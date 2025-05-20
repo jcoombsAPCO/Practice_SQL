@@ -1,0 +1,50 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+################
+# CRUD Examples
+################
+
+# In-memory database of items
+items = []
+
+# "Pydantic" model for item data - i.e. what data the item consists of - "variable name":"data type"
+class Item(BaseModel):
+    name: str
+    description: str
+
+# Puts a new item described by the class above into the /items/ bin (C = Create)
+# The returned item is what appears as the server response on the UI
+@app.post("/items/", response_model=Item)
+async def create_item(item: Item):          # () gives a variable name 'item' input into the function that is
+    items.append(item)                      # to have the same structure as the 'Item' Class
+    return item                             # -> after () is used to indicate the expected output structure
+
+# Reads and outputs the item that is present in the /items/ bin which has the index of {item_id} (R = Read)
+@app.get("/items/{item_id}", response_model=Item)
+async def read_item(item_id: int):                                      # Everything in () is a queried parameter
+    if item_id < 0 or item_id >= len(items):                            # i.e. it lets you narrow the search of a
+        raise HTTPException(status_code=404, detail="Item not found")   # given directory (like a filter)
+    return items[item_id]
+
+# Creates a new item and then replaces the old item with {item_id} with the new created item (U = Update)
+@app.put("/items/{item_id}", response_model=Item)
+async def update_item(item_id: int, item: Item):
+    if item_id < 0 or item_id >= len(items):
+        raise HTTPException(staus_code=404, detail="Item not Found")
+    items[item_id] = item
+    return item
+
+# Deletes the item in the /items/ bin with the index {item_id} (D = Delete)
+@app.delete("/items/{item_id}", response_model=Item)
+async def delete_item(item_id: int):
+    if item_id < 0 or item_id >= len(items):
+        raise HTTPException(status_code=404, detail="Item not found")
+    deleted_item = items.pop(item_id)
+    return deleted_item
