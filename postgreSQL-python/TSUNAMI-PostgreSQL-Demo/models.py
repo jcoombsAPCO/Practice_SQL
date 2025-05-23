@@ -1,6 +1,6 @@
 from datetime import date
 from sqlmodel import Field
-from sqlalchemy import Column, String, Date, Integer, ForeignKey
+from sqlalchemy import Column, String, Date, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from pydantic import BaseModel
@@ -17,6 +17,7 @@ class Album(Base):
     title = Column(String, nullable=False)
     release = Column(Date, nullable=False)
     songs = relationship("Song",back_populates="album")             # "Album" and "Song" in "" to avoid errors if they are not yet defined
+    numberOne = Column(Boolean, nullable=True)
 
 class Song(Base):
     __tablename__ = 'Songs'
@@ -27,6 +28,12 @@ class Song(Base):
     album = relationship("Album",back_populates="songs")            # back_populates must be present in both tables that
                                                                     # use it, but the foreign key is only necessary in one;
 
+class Testing(Base):
+    __tablename__ = 'Test Table'
+    id = Column(Integer, primary_key=True)
+    Name = Column(String, nullable=False)
+    newCol = Column(String, nullable=False)
+
 # Both the "newAlbum" and "newSong" objects are pydantic base models that are necessary for validating responses in
 # endpoint requests for FastAPI; They can be used 1) to create a schema that makes user input easier to input (although
 # this would not likely be necessary in TSUNAMI) and 2) they validate the data in the output is correct - error managing
@@ -35,6 +42,7 @@ class newAlbum(BaseModel):
     title: str
     release: date
     songs: list["newSong"] = []
+    numberOne: bool
 
 class newSong(BaseModel):
     id: int = Field(default=None,primary_key=True)

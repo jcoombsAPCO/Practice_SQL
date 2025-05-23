@@ -32,7 +32,8 @@ async def create_album(                                # Pydantic formed newAlbu
         id = album_data.id,                 # This is why the SQL models are essential to create
         title = album_data.title,           
         release = album_data.release,       # The entries are filled according to the SQLmodel schema
-        songs = []
+        songs = [],
+        numberOne = album_data.numberOne 
     )
 
     song_objects = album_data.songs
